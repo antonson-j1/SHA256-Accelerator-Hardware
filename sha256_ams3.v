@@ -11,11 +11,12 @@ module sha256_tb ();
     
     wire [0:511] message;
     assign message = 512'b01110000011100100110111101101010011001010110001101110100011001100111000001100111011000010010111001100011011011110110110110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001111000;
-    //assign message = 512'h70726F6A656374667067612E636F6D80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000078;
+    
+    wire [255:0] h;
+    wire [31:0] k[0:63];
     
     integer i;
     initial begin
-        
         clk = 1;
         reset = 1;
         #100;
@@ -25,7 +26,7 @@ module sha256_tb ();
             @(posedge clk) i++;
             $display("Output %h Count %d", hashvalue, i);
         end
-        //if(ready) $finish;
+        if(ready) $finish;
     
     end 
     
@@ -40,7 +41,7 @@ module sha256_tb ();
     );
             
 endmodule*/
-
+    
 
 
 
@@ -249,50 +250,67 @@ module overall(
         end*/
     end
     
-    reg [6:0] count_hash;
+    reg [6:0] count_hash1, count_hash2;
     reg reset_hash;
     always @(posedge clk) reset_hash <= reset;
     
     always @(posedge clk or posedge reset_hash) begin
         //$display("Output %h", hashvalue);
         if(reset_hash) begin
-            count_hash   <= 7'd0;
+            count_hash1   <= 7'd0;
+            count_hash2   <= 7'd1;
             ready   <= 1'b0;
         end
         else begin
-            if(count_hash == 7'd63) begin count_hash <= count_hash; ready <= 1'b1; end
-            else                    begin count_hash <= count_hash + 1; ready <= 1'b0; end
+            if(count_hash1 == 7'd62) begin 
+                count_hash1 <= count_hash1; 
+                count_hash2 <= count_hash2;
+                ready <= 1'b1; 
+            end
+            else begin 
+                count_hash1 <= count_hash1 + 2;
+                count_hash2 <= count_hash2 + 2;
+                ready <= 1'b0; 
+            end
         end
     end
-    
+
     wire select;
     assign select = ~ready;
-    
-    reg [31:0] w_value, k_value;
+
+    reg [31:0] w_value1, w_value2, k_value1, k_value2;
     
     always @(posedge clk or posedge reset_hash) begin
-        /*if(ready == 1'b0)
-            $display("reset %d count_hash %d w_value %h k_value %h count %d", reset_hash, count_hash, w_value, k_value, ready, count);*/
+        /*if(ready_dash == 1'b0)
+            $display("select %d count_hash1 %d w_value1 %h count_hash2 %d w_value2 %h", select, count_hash1, w_value1, count_hash2, w_value2);*/
         if(reset_hash) begin
-            w_value <= w[0];
-            k_value <= k[0];
+            w_value1 <= w[0];
+            w_value2 <= w[1];
+            k_value1 <= k[0];
+            k_value2 <= k[1];
         end
         else begin
-            if(count_hash <= 7'd62) begin
-                w_value <= w[count_hash + 1];
-                k_value <= k[count_hash + 1];
+            if(count_hash1 <= 7'd60) begin
+                w_value1 <= w[count_hash1 + 2];
+                w_value2 <= w[count_hash2 + 2];
+                k_value1 <= k[count_hash1 + 2];
+                k_value2 <= k[count_hash2 + 2];
             end
             else begin
-                w_value <= 32'b0;
-                k_value <= 32'b0;
+                w_value1 <= 32'b0;
+                w_value2 <= 32'b0;
+                k_value1 <= 32'b0;
+                k_value2 <= 32'b0;
             end
         end
     end
     
     hash_output hash(
         .reset(reset_hash),
-        .w_i(w_value),
-        .k_i(k_value),
+        .w_i1(w_value1),
+        .w_i2(w_value2),
+        .k_i1(k_value1),
+        .k_i2(k_value2),
         .select(select),
         .clk(clk),
         .h0(h0),
@@ -313,8 +331,10 @@ endmodule
 
 module hash_output(
     input reset,
-    input [31:0] w_i,
-    input [31:0] k_i,
+    input [31:0] w_i1,
+    input [31:0] w_i2,
+    input [31:0] k_i1,
+    input [31:0] k_i2,
     input clk,
     
     input select,
@@ -331,11 +351,14 @@ module hash_output(
     output [255:0] hashvalue);
     
     reg [31:0] a, b, c, d, e, f, g, h;
-    wire [31:0]  a_new, b_new, c_new, d_new, e_new, f_new, g_new, h_new; 
+    wire [31:0] a_dash, b_dash, e_dash, f_dash;
+    wire [31:0] p1, p2, p3, p4, p5;
     
-    compression_algorithm CA0(
-        .k_i(k_i),
-        .w_i(w_i),
+    compression_algorithm_stage1 CA1(
+        .w_i1(w_i1),
+        .k_i1(k_i1),
+        .w_i2(w_i2),
+        .k_i2(k_i2),
         .a(a),
         .b(b),
         .c(c),
@@ -344,6 +367,28 @@ module hash_output(
         .f(f),
         .g(g),
         .h(h),
+        .a_dash(a_dash),
+        .b_dash(b_dash),
+        .e_dash(e_dash),
+        .f_dash(f_dash),
+        .p1(p1),
+        .p2(p2),
+        .p3(p3),
+        .p4(p4),
+        .p5(p5));    
+
+    wire [31:0]  a_new, b_new, c_new, d_new, e_new, f_new, g_new, h_new;
+    
+    compression_algorithm_stage2 CA2(
+        .a_dash(a_dash),
+        .b_dash(b_dash),
+        .e_dash(e_dash),
+        .f_dash(f_dash),
+        .p1(p1),
+        .p2(p2),
+        .p3(p3),
+        .p4(p4),
+        .p5(p5),        
         .a_new(a_new),
         .b_new(b_new),
         .c_new(c_new),
@@ -352,9 +397,9 @@ module hash_output(
         .f_new(f_new),
         .g_new(g_new),
         .h_new(h_new));
-    
         
     always @(posedge clk or posedge reset) begin
+        //$display("reset %d select %d    w-value1 %h w-value2 %h    a %h", reset, (~reset&select), w_i1, w_i2, a);
         if(reset) begin
             a     <= h0;
             b     <= h1;
@@ -417,9 +462,11 @@ module S1(
     assign Y = ( {X[5:0],X[31:6]} ^ {X[10:0],X[31:11]} ^ {X[24:0],X[31:25]} );
 endmodule
 
-module compression_algorithm(
-    input wire [31:0] k_i,
-    input wire [31:0] w_i,
+module compression_algorithm_stage1(
+    input wire [31:0] w_i1,
+    input wire [31:0] k_i1,
+    input wire [31:0] w_i2,
+    input wire [31:0] k_i2,
     
     input wire [31:0] a,
     input wire [31:0] b,
@@ -430,6 +477,67 @@ module compression_algorithm(
     input wire [31:0] g,
     input wire [31:0] h,
     
+    output wire [31:0] a_dash,
+    output wire [31:0] b_dash,
+    output wire [31:0] e_dash,
+    output wire [31:0] f_dash,
+    
+    output wire [31:0] p1,
+    output wire [31:0] p2,
+    output wire [31:0] p3,
+    output wire [31:0] p4,
+    output wire [31:0] p5
+);    
+    
+    assign a_dash = a;
+    assign b_dash = b;
+    assign e_dash = e;
+    assign f_dash = f;
+    
+    wire [31:0] t1, t2, t3, t4, t5, t6; 
+    wire [31:0] Ch, Maj, s0, s1;
+    S1 S1(
+        .X(e)  ,
+        .Y(s1));
+    
+    S0 S0(
+        .X(a) ,
+        .Y(s0));
+    
+    assign Ch    = (e & f) ^ ((~e) & g);
+    assign Maj   = (a & b) ^ (a & c) ^ (b & c);
+    
+    assign t1 = w_i2 + k_i2;
+    
+    assign p4 = t1 + g;          //2 addition stages 
+    assign p5 = p4 + c;          //3 addition stages
+    
+    assign t2 = w_i1 + k_i1;     
+    assign t3 = t2   + h;       
+    assign t4 = s1   + Ch;
+    assign p3 = t3   + t4;       //3 addition stages
+    
+    assign t5 = h + d;
+    assign t6 = t5 + t2;
+    assign p2 = t4 + t6;         //3 addition stages
+    
+    assign p1 = s0 + Maj;        //1 addition stage
+    
+endmodule
+
+
+module compression_algorithm_stage2(
+    input wire [31:0] a_dash,
+    input wire [31:0] b_dash,
+    input wire [31:0] e_dash,
+    input wire [31:0] f_dash,
+    
+    input wire [31:0] p1,
+    input wire [31:0] p2,
+    input wire [31:0] p3,
+    input wire [31:0] p4,
+    input wire [31:0] p5,
+    
     output wire [31:0] a_new,
     output wire [31:0] b_new,
     output wire [31:0] c_new,
@@ -437,31 +545,35 @@ module compression_algorithm(
     output wire [31:0] e_new,
     output wire [31:0] f_new,
     output wire [31:0] g_new,
-    output wire [31:0] h_new);
-    
-    
-    wire [31:0] ch, temp1, temp2, maj, t1, t2, t3, t4;
+    output wire [31:0] h_new
+);
 
+    assign f_new = p2;
+    assign b_new = p1 + p3;    //1 addition stage
+    assign c_new = a_dash;
+    assign d_new = b_dash;
+    assign g_new = e_dash;
+    assign h_new = f_dash;
+    
+    wire [31:0] Ch, Maj, s0, s1;
+    
     S1 S1(
-        .X(e)  ,
-        .Y(t1));
+        .X(p2)  ,
+        .Y(s1));
     
     S0 S0(
-        .X(a) ,
-        .Y(t2));
+        .X(b_new) ,
+        .Y(s0));
+
+    assign Ch = (p2 & e_dash) ^ ((~p2) & f_dash);
+    assign Maj = (a_dash & b_dash) ^ (b_dash & b_new) ^ (a_dash & b_new);
     
-    assign ch    = (e & f) ^ ((~e) & g);
-    assign temp1 = h + t1 + ch + k_i+  w_i;
-    assign maj   = (a & b) ^ (a & c) ^ (b & c);
-    assign temp2 = t2 + maj;
-        
-    assign h_new = g;
-    assign g_new = f;
-    assign f_new = e;
-    assign e_new = d + temp1;
-    assign d_new = c;
-    assign c_new = b;
-    assign b_new = a;
-    assign a_new = temp1 + temp2;
+    wire [31:0] t1, t2, t3;
+    assign t1 = Ch + s1;
+    assign t2 = p4 + t1;
+    assign t3 = Maj + s0;
+    assign a_new = t2 + t3;  //3 addition stages
+    
+    assign e_new = t1 + p5;
 
 endmodule

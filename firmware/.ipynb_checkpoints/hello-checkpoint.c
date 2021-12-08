@@ -96,8 +96,8 @@ void send_stat(bool status)
 }
 
 #define HASH_BASE 0x30000000
-#define HASH_IN (HASH_BASE + 4)
-#define HASH_OP (HASH_BASE + 8)
+#define HASH_IN (HASH_BASE + 256)
+#define HASH_OP (HASH_BASE + 512)
 #define START_SIG 0x01
 #define TIMEOUT 1000
 
@@ -168,15 +168,16 @@ void hello(void)
 	print_dec(x);
 	print_str("\n");*/
     
-    //str message = "5889327917179663147180112994148401170096306829544976078896105398862020600622317784681704323617482747877095829092658769959852880661138250933343343068840056";
-    int message = 12;
+    //int message = "5889327917179663147180112994148401170096306829544976078896105398862020600622317784681704323617482747877095829092658769959852880661138250933343343068840056";
+    //long long int message = 2784920088420;
+    int message = 16;
     print_str("Hashing: ");
-	print_hex(message, 512);
+	print_hex(message, 128);
     print_str("\n\n In hardware: \n");
     Hash_Msg(message);
     Hash_StartAndWait();
     int x = Hash_GetResult();
-    print_hex(x, 256);
+    print_hex(x, 64);
     print_str("\n");
     
     /*

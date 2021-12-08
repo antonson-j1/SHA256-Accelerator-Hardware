@@ -125,7 +125,7 @@ module axi4_mem_periph #(
 			mem_axi_rvalid <= 1;
 			latched_raddr_en = 0; // Why?
 		end else
-        if (latched_raddr == 32'h3000_008) begin
+        if (latched_raddr == 32'h3000_0200) begin
 			// Send back whatever you want?  Output of seqmult?
 			mem_axi_rdata <= hashvalue;
 			mem_axi_rvalid <= 1;
@@ -172,7 +172,7 @@ module axi4_mem_periph #(
 			$display("Write %3d to the reset signal", latched_wdata);
             reset <= latched_wdata;
 		end else 
-		if (latched_waddr == 32'h3000_0004) begin // Add custom functionality
+        if (latched_waddr == 32'h3000_0100) begin // Add custom functionality
             $display("Write %b to input 'message'", latched_wdata);
             message <= latched_wdata;
 		end 
