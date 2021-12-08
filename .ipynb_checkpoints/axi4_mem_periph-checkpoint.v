@@ -33,12 +33,20 @@ module axi4_mem_periph #(
 	reg verbose;
 	initial verbose = $test$plusargs("verbose") || VERBOSE;
     
+    /*
     reg reset; 
     reg [31:0] a, b;
     wire [31:0] p; 
     wire rdy;
+    */
+    
     //wire reset_w;
     //wire [31:0] a_w, b_w;
+    
+    reg [0:511] message;
+    reg reset;
+    wire rdy;
+    wire [255:0] hashvalue;
 
 	initial begin
 		mem_axi_awready = 0;
@@ -86,13 +94,21 @@ module axi4_mem_periph #(
 		fast_wdata <= 1;
 	end endtask
     
-    seq_mult seq_mult(
+    /*seq_mult seq_mult(
         .p(p),
         .rdy(rdy),
         .clk(clk),
         .reset(reset),
         .a(a),
         .b(b)
+    );*/
+    
+    overall sha_core(
+        .message(message),
+        .clk(clk),
+        .reset(reset),
+        .ready(rdy),
+        .hashvalue(hashvalue)
     );
 
 	task handle_axi_rvalid; begin
@@ -109,9 +125,9 @@ module axi4_mem_periph #(
 			mem_axi_rvalid <= 1;
 			latched_raddr_en = 0; // Why?
 		end else
-		if (latched_raddr == 32'h3000_000c) begin
+        if (latched_raddr == 32'h3000_008) begin
 			// Send back whatever you want?  Output of seqmult?
-			mem_axi_rdata <= p;
+			mem_axi_rdata <= hashvalue;
 			mem_axi_rvalid <= 1;
 			latched_raddr_en = 0; // Why?
 		end else begin
@@ -157,13 +173,14 @@ module axi4_mem_periph #(
             reset <= latched_wdata;
 		end else 
 		if (latched_waddr == 32'h3000_0004) begin // Add custom functionality
-			$display("Write %3d to mult 'a' input", latched_wdata);
-            a <= latched_wdata;
-		end else 
-		if (latched_waddr == 32'h3000_0008) begin // Add custom functionality
+            $display("Write %b to input 'message'", latched_wdata);
+            message <= latched_wdata;
+		end 
+        /*else if (latched_waddr == 32'h3000_0008) begin // Add custom functionality
 			$display("Write %3d to mult 'b' input", latched_wdata);
             b <= latched_wdata;
-		end else begin
+		end*/ 
+        else begin
 			$display("OUT-OF-BOUNDS MEMORY WRITE TO %08x", latched_waddr);
 			$finish;
 		end

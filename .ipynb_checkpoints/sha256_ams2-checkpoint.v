@@ -1,5 +1,6 @@
 `timescale 1ns/1ns 
 
+/*
 module sha256_tb ();
     
     reg  clk, reset;
@@ -40,6 +41,7 @@ module sha256_tb ();
     );
             
 endmodule
+*/
     
 
 

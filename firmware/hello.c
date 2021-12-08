@@ -5,6 +5,8 @@
 // binary, for any purpose, commercial or non-commercial, and by any
 // means.
 
+
+/*
 #include "firmware.h"
 
 #define STAT_ADDR 0x21000000
@@ -77,10 +79,80 @@ int Mult_GetResult(void)
 	volatile int *p = (int *)MULT_RES;
 	return (*p);
 }
+*/
+
+
+#include "firmware.h"
+
+#define STAT_ADDR 0x21000000
+void send_stat(bool status);
+void send_stat(bool status)
+{
+	if (status) {
+		*((volatile int *)STAT_ADDR) = 1;
+	} else {
+		*((volatile int *)STAT_ADDR) = 0;
+	}
+}
+
+#define HASH_BASE 0x30000000
+#define HASH_IN (HASH_BASE + 4)
+#define HASH_OP (HASH_BASE + 8)
+#define START_SIG 0x01
+#define TIMEOUT 1000
+
+// Function prototypes
+void Hash_Msg(int x);
+void Hash_StartAndWait(void);
+int Hash_GetResult(void);
+
+// Set up the input 'message'
+void Hash_Msg(int x)
+{
+	volatile int *p = (int *)HASH_IN;
+	*p = x;
+}
+
+// Do a "reset" so that the values get latched into the multiplier
+// and then wait until the signal "rdy" comes back as 1
+void Hash_StartAndWait(void)
+{
+	volatile int *p = (int *)HASH_BASE;
+	// Set the "reset" signal to 1 - assume the LSB bit of MULT_BASE
+	// is connected to the "reset" signal
+	*p = START_SIG; 
+	// Remove the reset signal.  Since each instruction anyway takes
+	// multiple cycles, the reset will be high for at least one clock
+	// which is enough
+	*p = 0;
+	// Keep reading back from MULT_BASE and check if the LSB is set to 1
+	// If the "rdy" signal is connected to the LSB, this should happen
+	// after multiplication is complete.
+	// Note: you can condense all the code below into a single line.
+	// It is written this way for clarity, not efficiency.
+	bool rdy = false;
+	int count = 0;
+	while (!rdy && (count < TIMEOUT)) {
+		volatile int x = (*p); // read from MULT_BASE
+		if ((x & 0x01) == 1) rdy = true;
+		count ++;
+	}
+	if (count == TIMEOUT) {
+		print_str("TIMED OUT: did not get a 'rdy' signal back!");
+	}
+}
+
+int Hash_GetResult(void)
+{
+	volatile int *p = (int *)HASH_OP;
+	return (*p);
+}
+
+
 
 void hello(void)
 {
-	int a = 6;
+	/*int a = 6;
 	int b = 7;
 	print_str("Multiplying: ");
 	print_dec(a);
@@ -94,9 +166,22 @@ void hello(void)
 	Mult_StartAndWait();
 	int x = Mult_GetResult();
 	print_dec(x);
-	print_str("\n");
-
+	print_str("\n");*/
+    
+    //str message = "5889327917179663147180112994148401170096306829544976078896105398862020600622317784681704323617482747877095829092658769959852880661138250933343343068840056";
+    int message = 12;
+    print_str("Hashing: ");
+	print_hex(message, 512);
+    print_str("\n\n In hardware: \n");
+    Hash_Msg(message);
+    Hash_StartAndWait();
+    int x = Hash_GetResult();
+    print_hex(x, 256);
+    print_str("\n");
+    
+    /*
 	send_stat(x == a*b);
 	// send_stat(true);
+    */
 }
 
