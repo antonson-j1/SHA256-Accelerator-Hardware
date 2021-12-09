@@ -5,184 +5,146 @@
 // binary, for any purpose, commercial or non-commercial, and by any
 // means.
 
-
-/*
 #include "firmware.h"
 
 #define STAT_ADDR 0x21000000
 void send_stat(bool status);
 void send_stat(bool status)
 {
-	if (status) {
-		*((volatile int *)STAT_ADDR) = 1;
-	} else {
-		*((volatile int *)STAT_ADDR) = 0;
-	}
+    if (status) {
+        *((volatile int *)STAT_ADDR) = 1;
+    } else {
+        *((volatile int *)STAT_ADDR) = 0;
+    }
 }
 
-#define MULT_BASE 0x30000000
-#define MULT_A (MULT_BASE + 4)
-#define MULT_B (MULT_BASE + 8)
-#define MULT_RES (MULT_BASE + 12)
+#define BASE 0x30000000
+#define INPUT_BASE 0x30000300
+#define OUTPUT_BASE 0x30000200
+
 #define START_SIG 0x01
 #define TIMEOUT 1000
 
 // Function prototypes
-void Mult_WriteA(int x);
-void Mult_WriteB(int x);
-void Mult_StartAndWait(void);
-int Mult_GetResult(void);
+void WriteMessage(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
 
-// Set up the 'a' input to the multiplier
-void Mult_WriteA(int x)
-{
-	volatile int *p = (int *)MULT_A;
-	*p = x;
-}
-// Set up the 'b' input to the multiplier
-void Mult_WriteB(int x)
-{
-	volatile int *p = (int *)MULT_B;
-	*p = x;
-}
-// Do a "reset" so that the values get latched into the multiplier
-// and then wait until the signal "rdy" comes back as 1
-void Mult_StartAndWait(void)
-{
-	volatile int *p = (int *)MULT_BASE;
-	// Set the "reset" signal to 1 - assume the LSB bit of MULT_BASE
-	// is connected to the "reset" signal
-	*p = START_SIG; 
-	// Remove the reset signal.  Since each instruction anyway takes
-	// multiple cycles, the reset will be high for at least one clock
-	// which is enough
-	*p = 0;
-	// Keep reading back from MULT_BASE and check if the LSB is set to 1
-	// If the "rdy" signal is connected to the LSB, this should happen
-	// after multiplication is complete.
-	// Note: you can condense all the code below into a single line.
-	// It is written this way for clarity, not efficiency.
-	bool rdy = false;
-	int count = 0;
-	while (!rdy && (count < TIMEOUT)) {
-		volatile int x = (*p); // read from MULT_BASE
-		if ((x & 0x01) == 1) rdy = true;
-		count ++;
-	}
-	if (count == TIMEOUT) {
-		print_str("TIMED OUT: did not get a 'rdy' signal back!");
-	}
-}
+void StartAndWait(void);
+void GetOutput(void);
 
-int Mult_GetResult(void)
+//Sending message input
+void WriteMessage(int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12, int x13, int x14, int x15, int x16)
 {
-	volatile int *p = (int *)MULT_RES;
-	return (*p);
-}
-*/
-
-
-#include "firmware.h"
-
-#define STAT_ADDR 0x21000000
-void send_stat(bool status);
-void send_stat(bool status)
-{
-	if (status) {
-		*((volatile int *)STAT_ADDR) = 1;
-	} else {
-		*((volatile int *)STAT_ADDR) = 0;
-	}
+    volatile int *p = (int *)INPUT_BASE;
+    *p = x1;
+    p = p + 1;
+    *p = x2;
+    p = p + 1;
+    *p = x3;
+    p = p + 1;
+    *p = x4;
+    p = p + 1;
+    *p = x5;
+    p = p + 1;
+    *p = x6;
+    p = p + 1;
+    *p = x7;
+    p = p + 1;
+    *p = x8;
+    p = p + 1;
+    *p = x9;
+    p = p + 1;
+    *p = x10;
+    p = p + 1;
+    *p = x11;
+    p = p + 1;
+    *p = x12;
+    p = p + 1;
+    *p = x13;
+    p = p + 1;
+    *p = x14;
+    p = p + 1;
+    *p = x15;
+    p = p + 1;
+    *p = x16;
+    p = p + 1;
+    
+    /**p = x[0];
+    for(int i = 1; i < 16; i++){
+        p = p + 1;
+        *p = x[i];
+    }*/
 }
 
-#define HASH_BASE 0x30000000
-#define HASH_IN (HASH_BASE + 256)
-#define HASH_OP (HASH_BASE + 512)
-#define START_SIG 0x01
-#define TIMEOUT 1000
-
-// Function prototypes
-void Hash_Msg(int x);
-void Hash_StartAndWait(void);
-int Hash_GetResult(void);
-
-// Set up the input 'message'
-void Hash_Msg(int x)
+//wait until the signal "ready" comes back as 1
+void StartAndWait(void)
 {
-	volatile int *p = (int *)HASH_IN;
-	*p = x;
-}
-
-// Do a "reset" so that the values get latched into the multiplier
-// and then wait until the signal "rdy" comes back as 1
-void Hash_StartAndWait(void)
-{
-	volatile int *p = (int *)HASH_BASE;
-	// Set the "reset" signal to 1 - assume the LSB bit of MULT_BASE
-	// is connected to the "reset" signal
-	*p = START_SIG; 
-	// Remove the reset signal.  Since each instruction anyway takes
-	// multiple cycles, the reset will be high for at least one clock
-	// which is enough
-	*p = 0;
-	// Keep reading back from MULT_BASE and check if the LSB is set to 1
-	// If the "rdy" signal is connected to the LSB, this should happen
-	// after multiplication is complete.
-	// Note: you can condense all the code below into a single line.
-	// It is written this way for clarity, not efficiency.
-	bool rdy = false;
-	int count = 0;
-	while (!rdy && (count < TIMEOUT)) {
-		volatile int x = (*p); // read from MULT_BASE
-		if ((x & 0x01) == 1) rdy = true;
-		count ++;
-	}
-	if (count == TIMEOUT) {
-		print_str("TIMED OUT: did not get a 'rdy' signal back!");
-	}
-}
-
-int Hash_GetResult(void)
-{
-	volatile int *p = (int *)HASH_OP;
-	return (*p);
+    volatile int *p = (int *)BASE;
+    *p = START_SIG; 
+    // Remove the reset signal.  
+    *p = 0;
+    bool rdy = false;
+    int count = 0;
+    while (!rdy && (count < TIMEOUT)) {
+        volatile int x = (*p); // read from MULT_BASE
+        if ((x & 0x01) == 1) rdy = true;
+        count ++;
+    }
+    if (count == TIMEOUT) {
+        print_str("TIMED OUT: did not get a 'rdy' signal back!");
+    }
 }
 
 
+void GetOutput(void)
+{
+    volatile int *p = (int *)OUTPUT_BASE;
+    print_dec(*p);
+    print_str(" ");
+    for(int i = 1; i < 8; i++){
+        p = p + 1;
+        print_dec(*p);
+        print_str(" ");
+    }
+    
+}
 
 void hello(void)
 {
-	/*int a = 6;
-	int b = 7;
-	print_str("Multiplying: ");
-	print_dec(a);
-	print_str(" with ");
-	print_dec(b);
-	print_str(" to get ");
-	print_dec(a*b);
-	print_str("\n\nAnd now in hardware: \n");
-	Mult_WriteA(a);
-	Mult_WriteB(b);
-	Mult_StartAndWait();
-	int x = Mult_GetResult();
-	print_dec(x);
-	print_str("\n");*/
+    //int x[16] = {0x70726F6A, 0x65637466, 0x7067612E, 0x636F6D80, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000078};
     
-    //int message = "5889327917179663147180112994148401170096306829544976078896105398862020600622317784681704323617482747877095829092658769959852880661138250933343343068840056";
-    //long long int message = 2784920088420;
-    int message = 16;
-    print_str("Hashing: ");
-	print_hex(message, 128);
-    print_str("\n\n In hardware: \n");
-    Hash_Msg(message);
-    Hash_StartAndWait();
-    int x = Hash_GetResult();
-    print_hex(x, 64);
-    print_str("\n");
+    int x1 = 0x70726F6A;
+    int x2 = 0x65637466;
+    int x3 = 0x7067612E;
+    int x4 = 0x636F6D80;
+    int x5 = 0x00000000;
+    int x6 = 0x00000000;
+    int x7 = 0x00000000;
+    int x8 = 0x00000000;
+    int x9 = 0x00000000;
+    int x10 = 0x00000000;
+    int x11 = 0x00000000;
+    int x12 = 0x00000000;
+    int x13 = 0x00000000;
+    int x14 = 0x00000000;
+    int x15 = 0x00000000;
+    int x16 = 0x00000078;
     
-    /*
-	send_stat(x == a*b);
-	// send_stat(true);
-    */
-}
+    WriteMessage(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16);
+    StartAndWait();
+    GetOutput();
+    
+/*
+e2547202 3797185026
+08ff3334 150942516
+31f723cb 838280139
+e00b9c1d 3758857245
+45fc65b7 1174169015
+ac165015 2887143445
+1a3d8eb0 440241840
+cbd885a3 3419964835
 
+3419964835 440241840 2887143445 1174169015 3758857245 838280139 150942516 3797185026
+    
+    */
+    send_stat(true);
+}
