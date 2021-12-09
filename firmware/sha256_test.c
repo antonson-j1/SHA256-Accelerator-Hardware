@@ -58,16 +58,18 @@ int main()
     clock_t t;
     t = clock();
     
-    BYTE text1[] = {"abc"};
-    BYTE text2[] = {"abd"};
+    /*0x70726F6A, 0x65637466, 0x7067612E, 0x636F6D80, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000078*/
+    BYTE text1[] = {"ee2003"};
+        /*{"70726F6A656374667067612E636F6D80000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000078"};*/
+    BYTE text2[] = {"ee2003"};
     
     printf("SHA-256 tests: %s\n", sha256_test(text1, text2) ? "SUCCEEDED" : "FAILED");
     
     
     t = clock() - t;
-    //double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
+    double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
   
-    double time_taken = ((double)t);
+    //double time_taken = ((double)t);
         
     printf("the hashing took %f seconds to execute \n", time_taken);
     

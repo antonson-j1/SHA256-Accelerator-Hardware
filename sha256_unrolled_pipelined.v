@@ -1,7 +1,7 @@
 `timescale 1ns/1ns 
 
-/*
-module sha256_tb ();
+
+/*module sha256_tb ();
     
     reg  clk, reset;
     wire ready;
@@ -24,7 +24,7 @@ module sha256_tb ();
         i = 0;
         while (ready == 0) begin
             @(posedge clk) i++;
-            //$display("Output %h Count %d", hashvalue, i);
+            $display("Output %h Count %d", hashvalue, i);
         end
         //if(ready) $finish;
     
@@ -38,8 +38,8 @@ module sha256_tb ();
         .hashvalue(hashvalue)
     );
             
-endmodule
-*/
+endmodule*/
+
 
 
 
@@ -194,7 +194,7 @@ module overall(
     end
     
     integer i;    
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         if(reset) begin
             count16_1   <= 7'd0;
             count15_1   <= 7'd1;
@@ -251,26 +251,26 @@ module overall(
     always @(posedge clk) reset_hash <= reset;
     
     reg ready_dash;
-    always @(posedge clk or posedge reset_hash) begin
+    always @(posedge clk) begin
         //$display("Output %h", hashvalue);
         if(reset_hash) begin
             count_hash1   <= 7'd0;
             count_hash2   <= 7'd1;
             ready_dash   <= 1'b0;
-            ready   <= 1'b0;
+            //ready   <= 1'b0;
         end
         else begin
             if(count_hash1 == 7'd62) begin 
                 count_hash1 <= count_hash1; 
                 count_hash2 <= count_hash2;
                 ready_dash <= 1'b1;
-                ready <= 1'b1;
+                //ready <= 1'b1;
             end
             else begin 
                 count_hash1 <= count_hash1 + 2;
                 count_hash2 <= count_hash2 + 2;
                 ready_dash <= 1'b0;
-                ready <= 1'b0;
+                //ready <= 1'b0;
             end
         end
     end
@@ -285,7 +285,7 @@ module overall(
 
     reg [31:0] w_value1, w_value2, k_value1, k_value2;
     
-    always @(posedge clk or posedge reset_hash) begin
+    always @(posedge clk) begin
         /*if(ready_dash == 1'b0)
             $display("select %d count_hash1 %d w_value1 %h count_hash2 %d w_value2 %h", select, count_hash1, w_value1, count_hash2, w_value2);*/
         if(reset_hash) begin
@@ -450,17 +450,30 @@ module hash_output(
     /*always @(posedge clk or posedge reset) begin
         $display("sel %d w1 %h k1 %h w2 %h k2 %h \n a %h b %h c %h d %h e %h f %h g %h h %h \n p1 %h p2 %h p3 %h p4 %h p5 %h \n p1_cap %h p2_cap %h p3_cap %h p4_cap %h p5_cap %h \n\n", (~reset&select), w_i1, k_i1, w_i2, k_i2, a, b, c, d, e, f, g, h, p1, p2, p3, p4, p5, p1_cap, p2_cap, p3_cap, p4_cap, p5_cap);
     end*/
-    
-    wire [31:0] h0_out, h1_out, h2_out, h3_out, h4_out, h5_out, h6_out, h7_out;
-    assign h0_out = (select) ? h0 + a : h0_out;
-    assign h1_out = (select) ? h1 + b : h1_out;
-    assign h2_out = (select) ? h2 + c : h2_out;
-    assign h3_out = (select) ? h3 + d : h3_out;
-    assign h4_out = (select) ? h4 + e : h4_out;
-    assign h5_out = (select) ? h5 + f : h5_out;
-    assign h6_out = (select) ? h6 + g : h6_out;
-    assign h7_out = (select) ? h7 + h : h7_out;
-    
+ 
+    reg [31:0] h0_out, h1_out, h2_out, h3_out, h4_out, h5_out, h6_out, h7_out;
+    always @(posedge clk) begin
+        if(select) begin
+            h0_out <= h0 + a;
+            h1_out <= h1 + b;
+            h2_out <= h2 + c;
+            h3_out <= h3 + d;
+            h4_out <= h4 + e;
+            h5_out <= h5 + f;
+            h6_out <= h6 + g;
+            h7_out <= h7 + h;
+        end
+        else begin
+            h0_out <= h0_out;
+            h1_out <= h1_out;
+            h2_out <= h2_out;
+            h3_out <= h3_out;
+            h4_out <= h4_out;
+            h5_out <= h5_out;
+            h6_out <= h6_out;
+            h7_out <= h7_out;
+        end
+    end
     assign hashvalue = {h0_out, h1_out, h2_out, h3_out, h4_out, h5_out, h6_out, h7_out};
 
 endmodule

@@ -1,7 +1,6 @@
 `timescale 1ns/1ns 
 
-/*
-module sha256_tb ();
+/*module sha256_tb ();
     
     reg  clk, reset;
     wire ready;
@@ -24,9 +23,9 @@ module sha256_tb ();
         i = 0;
         while (ready == 0) begin
             @(posedge clk) i++;
-            $display("Output %h Count %d", hashvalue, i);
+            //$display("Output %h Count %d", hashvalue, i);
         end
-        if(ready) $finish;
+        //if(ready) $finish;
     
     end 
     
@@ -196,7 +195,7 @@ module overall(
     end
     
     integer i;    
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         if(reset) begin
             count16_1   <= 7'd0;
             count15_1   <= 7'd1;
@@ -254,7 +253,7 @@ module overall(
     reg reset_hash;
     always @(posedge clk) reset_hash <= reset;
     
-    always @(posedge clk or posedge reset_hash) begin
+    always @(posedge clk) begin
         //$display("Output %h", hashvalue);
         if(reset_hash) begin
             count_hash1   <= 7'd0;
@@ -280,7 +279,7 @@ module overall(
 
     reg [31:0] w_value1, w_value2, k_value1, k_value2;
     
-    always @(posedge clk or posedge reset_hash) begin
+    always @(posedge clk) begin
         /*if(ready_dash == 1'b0)
             $display("select %d count_hash1 %d w_value1 %h count_hash2 %d w_value2 %h", select, count_hash1, w_value1, count_hash2, w_value2);*/
         if(reset_hash) begin
@@ -398,7 +397,7 @@ module hash_output(
         .g_new(g_new),
         .h_new(h_new));
         
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         //$display("reset %d select %d    w-value1 %h w-value2 %h    a %h", reset, (~reset&select), w_i1, w_i2, a);
         if(reset) begin
             a     <= h0;
