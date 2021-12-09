@@ -26,53 +26,20 @@ void send_stat(bool status)
 #define TIMEOUT 1000
 
 // Function prototypes
-void WriteMessage(int, int, int, int, int, int, int, int, int, int, int, int, int, int, int, int);
 
+void WriteMessage(int x[16]);
 void StartAndWait(void);
 void GetOutput(void);
 
 //Sending message input
-void WriteMessage(int x1, int x2, int x3, int x4, int x5, int x6, int x7, int x8, int x9, int x10, int x11, int x12, int x13, int x14, int x15, int x16)
+void WriteMessage(int x[16])
 {
     volatile int *p = (int *)INPUT_BASE;
-    *p = x1;
-    p = p + 1;
-    *p = x2;
-    p = p + 1;
-    *p = x3;
-    p = p + 1;
-    *p = x4;
-    p = p + 1;
-    *p = x5;
-    p = p + 1;
-    *p = x6;
-    p = p + 1;
-    *p = x7;
-    p = p + 1;
-    *p = x8;
-    p = p + 1;
-    *p = x9;
-    p = p + 1;
-    *p = x10;
-    p = p + 1;
-    *p = x11;
-    p = p + 1;
-    *p = x12;
-    p = p + 1;
-    *p = x13;
-    p = p + 1;
-    *p = x14;
-    p = p + 1;
-    *p = x15;
-    p = p + 1;
-    *p = x16;
-    p = p + 1;
-    
-    /**p = x[0];
+    *p = x[0];
     for(int i = 1; i < 16; i++){
         p = p + 1;
         *p = x[i];
-    }*/
+    }
 }
 
 //wait until the signal "ready" comes back as 1
@@ -111,25 +78,26 @@ void GetOutput(void)
 void hello(void)
 {
     //int x[16] = {0x70726F6A, 0x65637466, 0x7067612E, 0x636F6D80, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000078};
+    int x[16];
     
-    int x1 = 0x70726F6A;
-    int x2 = 0x65637466;
-    int x3 = 0x7067612E;
-    int x4 = 0x636F6D80;
-    int x5 = 0x00000000;
-    int x6 = 0x00000000;
-    int x7 = 0x00000000;
-    int x8 = 0x00000000;
-    int x9 = 0x00000000;
-    int x10 = 0x00000000;
-    int x11 = 0x00000000;
-    int x12 = 0x00000000;
-    int x13 = 0x00000000;
-    int x14 = 0x00000000;
-    int x15 = 0x00000000;
-    int x16 = 0x00000078;
+    x[0] = 0x70726F6A;
+    x[1] = 0x65637466;
+    x[2] = 0x7067612E;
+    x[3] = 0x636F6D80;
+    x[4] = 0x00000000;
+    x[5] = 0x00000000;
+    x[6] = 0x00000000;
+    x[7] = 0x00000000;
+    x[8] = 0x00000000;
+    x[9] = 0x00000000;
+    x[10] = 0x00000000;
+    x[11] = 0x00000000;
+    x[12] = 0x00000000;
+    x[13] = 0x00000000;
+    x[14] = 0x00000000;
+    x[15] = 0x00000078;
     
-    WriteMessage(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16);
+    WriteMessage(x);
     StartAndWait();
     GetOutput();
     
