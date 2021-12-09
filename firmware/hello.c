@@ -1,11 +1,5 @@
-// This is free and unencumbered software released into the public domain.
-//
-// Anyone is free to copy, modify, publish, use, compile, sell, or
-// distribute this software, either in source code form or as a compiled
-// binary, for any purpose, commercial or non-commercial, and by any
-// means.
-
 #include "firmware.h"
+#include "stats_helper.c"
 
 #define STAT_ADDR 0x21000000
 void send_stat(bool status);
@@ -97,10 +91,17 @@ void hello(void)
     x[14] = 0x00000000;
     x[15] = 0x00000078;
     
+    // Calculate the time taken
+    int t_start = get_num_cycles();
+    
     WriteMessage(x);
     StartAndWait();
     GetOutput();
     
+    int t_end   = get_num_cycles();
+    print_str("\nCompleted in ");
+    print_dec(t_end - t_start);
+	print_str(" cycles.\n");
 /*
 e2547202 3797185026
 08ff3334 150942516
