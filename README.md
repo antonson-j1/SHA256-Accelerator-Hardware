@@ -229,4 +229,182 @@ The diagram above shows the implementation of the most primitive implementation 
 
 ![SHA UNROLLED IMPLEMENTATION BLOCK DIAGRAM](https://git.ee2003.dev.iitm.ac.in/ee19b025/project-sha256/src/branch/master/Others/unrolled.jpg?raw=true)
 
+The diagram above shows the implementation of the SHA256 accelerator peripheral with Unrolling spacial optimisation.
+
 ![SHA UNROLLED IMPLEMENTATION BLOCK DIAGRAM](https://git.ee2003.dev.iitm.ac.in/ee19b025/project-sha256/src/branch/master/Others/pipelined.jpg?raw=true)
+
+The diagram above shows the implementation of the SHA256 accelerator peripheral with Unrolling & Pipelining.
+
+## **Yosys Synthesis Results:**
+
+#### ***Pipelined & Unrolled:***
+
+    === design hierarchy ===
+    
+       overall                           1
+         hash_output                     1
+           compression_algorithm_stage1      1
+             S0                          1
+             S1                          1
+           compression_algorithm_stage2      1
+             S0                          1
+             S1                          1
+         w_new_calc                      2
+           s0                            1
+           s1                            1
+    
+       Number of wires:              15910
+       Number of wire bits:          26608
+       Number of public wires:         297
+       Number of public wire bits:    9791
+       Number of memories:               0
+       Number of memory bits:            0
+       Number of processes:              0
+       Number of cells:              20460
+         FDRE                         2799
+         LUT1                           22
+         LUT2                         1157
+         LUT3                         1433
+         LUT4                          307
+         LUT5                         1758
+         LUT6                         9609
+         MUXCY                         720
+         MUXF7                        1755
+         MUXF8                         154
+         XORCY                         746
+    
+       Estimated number of LCs:      13107
+       
+
+
+
+        Hashed Value in hex: E2547202 08FF3334 31F723CB E00B9C1D 45FC65B7 AC165015 1A3D8EB0 CBD885A3
+        
+        
+        Software Calculation completed in 26657 cycles.
+        Instruction counter ..5275
+        CPI: 5.05
+
+        Hardware Calculation Completed in 531 cycles.
+        Instruction counter ..127
+        CPI: 4.18
+
+        Total Cycle counter (Including Hardware & Software) .......... 57027
+        Total Instruction counter (Including Hardware & Software) .... 10413
+        CPI: 5.47
+        DONE
+
+
+#### ***Unrolled Implementation:***
+
+    === design hierarchy ===
+
+       overall                           1
+         hash_output                     1
+           compression_algorithm_stage1      1
+             S0                          1
+             S1                          1
+           compression_algorithm_stage2      1
+             S0                          1
+             S1                          1
+         w_new_calc                      2
+           s0                            1
+           s1                            1
+
+       Number of wires:              15564
+       Number of wire bits:          25983
+       Number of public wires:         286
+       Number of public wire bits:    9501
+       Number of memories:               0
+       Number of memory bits:            0
+       Number of processes:              0
+       Number of cells:              19835
+         FDRE                         2509
+         LUT1                           22
+         LUT2                         1618
+         LUT3                          945
+         LUT4                          387
+         LUT5                         1524
+         LUT6                         9607
+         MUXCY                         720
+         MUXF7                        1601
+         MUXF8                         156
+         XORCY                         746
+
+       Estimated number of LCs:      12606
+       
+       
+       
+       Hashed Value in hex: E2547202 08FF3334 31F723CB E00B9C1D 45FC65B7 AC165015 1A3D8EB0 CBD885A3 
+       
+       
+        Software Calculation completed in 26657 cycles.
+        Instruction counter ..5275
+        CPI: 5.05
+
+        Hardware Calculation Completed in 531 cycles.
+        Instruction counter ..127
+        CPI: 4.18
+
+        Total Cycle counter (Including Hardware & Software) .......... 57027
+        Total Instruction counter (Including Hardware & Software) .... 10413
+        CPI: 5.47
+        DONE
+        
+        
+#### ***Base Implementation:***
+
+       === design hierarchy ===
+
+       overall                           1
+         hash_output                     1
+           compression_algorithm         1
+             S0                          1
+             S1                          1
+         w_new_calc                      1
+           s0                            1
+           s1                            1
+
+       Number of wires:               8759
+       Number of wire bits:          17086
+       Number of public wires:         227
+       Number of public wire bits:    7763
+       Number of memories:               0
+       Number of memory bits:            0
+       Number of processes:              0
+       Number of cells:              12187
+         FDRE                         2409
+         LUT1                           16
+         LUT2                          911
+         LUT3                         2178
+         LUT4                          225
+         LUT5                          596
+         LUT6                         4256
+         MUXCY                         411
+         MUXF7                         682
+         MUXF8                          81
+         XORCY                         422
+
+       Estimated number of LCs:       7255
+       
+       
+        Hashed Value in hex: E2547202 08FF3334 31F723CB E00B9C1D 45FC65B7 AC165015 1A3D8EB0 CBD885A3 
+        
+        
+        Software Calculation completed in 26657 cycles.
+        Instruction counter ..5275
+        CPI: 5.05
+
+        Hardware Calculation Completed in 561 cycles.
+        Instruction counter ..134
+        CPI: 4.18
+
+        Total Cycle counter (Including Hardware & Software) .......... 57057
+        Total Instruction counter (Including Hardware & Software) .... 10420
+        CPI: 5.47
+        DONE
+
+
+### Some Failiures:
+1. Tried interfacing with MicroBlaze in Vivado, but failed.
+2. Implementation of Padder Parser block was not done.
