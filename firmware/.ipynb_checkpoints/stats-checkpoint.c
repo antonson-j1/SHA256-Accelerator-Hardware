@@ -29,14 +29,14 @@ void stats(void)
 {
 	unsigned int num_cycles, num_instr;
 	__asm__ volatile ("rdcycle %0; rdinstret %1;" : "=r"(num_cycles), "=r"(num_instr));
-	print_str("Cycle counter ........");
+	print_str("Total Cycle counter ........");
 	stats_print_dec(num_cycles, 8, false);
-	print_str("\nInstruction counter ..");
+	print_str("\nTotal Instruction counter ..");
 	stats_print_dec(num_instr, 8, false);
-	print_str("\nCPI: ");
+	/*print_str("\nCPI: ");
 	stats_print_dec((num_cycles / num_instr), 0, false);
 	print_str(".");
-	stats_print_dec(((100 * num_cycles) / num_instr) % 100, 2, true);
+	stats_print_dec(((100 * num_cycles) / num_instr) % 100, 2, true);*/
 	print_str("\n");
 }
 

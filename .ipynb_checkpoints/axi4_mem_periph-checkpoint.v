@@ -206,86 +206,86 @@ module axi4_mem_periph #(
             
             
         if (latched_waddr == 32'h3000_0000) begin // Add custom functionality
-            $display("Writing reset signal", latched_wdata);
+            //$display("Writing reset signal", latched_wdata);
             reset <= latched_wdata;
         end else 
         
-        if (latched_waddr == 32'h3000_0300) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0100) begin // Add custom functionality
             //Input message[0:31]
             message[0:31] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0304) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0104) begin // Add custom functionality
             //Input message[32:63]
             message[32:63] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0308) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0108) begin // Add custom functionality
             //Input message[64:95]
             message[64:95] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_030c) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_010c) begin // Add custom functionality
             //Input message[96:127]
             message[96:127] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0310) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0110) begin // Add custom functionality
             //Input message[128:159]
             message[128:159] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0314) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0114) begin // Add custom functionality
             //Input message[160:191]
             message[160:191] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0318) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0118) begin // Add custom functionality
             //Input message[192:223]
             message[192:223] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_031c) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_011c) begin // Add custom functionality
             //Input message[224:255]
             message[224:255] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0320) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0120) begin // Add custom functionality
             //Input message[256:287]
             message[256:287] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0324) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0124) begin // Add custom functionality
             //Input message[288:319]
             message[288:319] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0328) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0128) begin // Add custom functionality
             //Input message[320:351]
             message[320:351] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_032c) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_012c) begin // Add custom functionality
             //Input message[352:383]
             message[352:383] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0330) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0130) begin // Add custom functionality
             //Input message[384:415]
             message[384:415] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0334) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0134) begin // Add custom functionality
             //Input message[416:447]
             message[416:447] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_0338) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_0138) begin // Add custom functionality
             //Input message[448:479]
             message[448:479] <= latched_wdata;
         end else 
 
-        if (latched_waddr == 32'h3000_033c) begin // Add custom functionality
+            if (latched_waddr == 32'h3000_013c) begin // Add custom functionality
             //Input message[480:511]
             message[480:511] <= latched_wdata;
         end else 
