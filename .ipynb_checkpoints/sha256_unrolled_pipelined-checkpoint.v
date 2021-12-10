@@ -240,11 +240,8 @@ module overall(
                 done <= 1'b0; 
             end
         end
-        /*if(count == 7'd63) begin 
-            for(i = 0; i < 64; i++)
-                $display("i: %d w[i]: %h", i, w[i]);
-        end*/
     end
+
     
     reg [6:0] count_hash1, count_hash2;
     reg reset_hash;
@@ -287,7 +284,7 @@ module overall(
     
     always @(posedge clk) begin
         /*if(ready_dash == 1'b0)
-            $display("select %d count_hash1 %d w_value1 %h count_hash2 %d w_value2 %h", select, count_hash1, w_value1, count_hash2, w_value2);*/
+            $display("select %d count_hash1 %d w_value1 %d count_hash2 %d w_value2 %d", select, count_hash1, w_value1, count_hash2, w_value2);*/
         if(reset_hash) begin
             w_value1 <= w[0];
             w_value2 <= w[1];
