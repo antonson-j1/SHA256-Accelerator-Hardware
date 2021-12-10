@@ -313,6 +313,10 @@ void sha_256_print(unsigned int message[16])
 
     unsigned int w[64];
     unsigned int s0, s1;
+    
+    unsigned int t_start2 = get_num_cycles();
+    unsigned int num_instr_start2 = get_num_instr();
+    
     for(int i = 0; i < 16; i++)
     {
         w[i] = message[i];
@@ -324,7 +328,7 @@ void sha_256_print(unsigned int message[16])
         s1 = SIG1(w[i-2]);
         w[i] = s0 + s1 + w[i-16] + w[i-7];
     }
-        
+    
     unsigned int temp1, ch, S1, S0, maj, temp2;
     for (int i = 0; i < 64; i++)
     {
@@ -354,6 +358,22 @@ void sha_256_print(unsigned int message[16])
     hash_output[5] = h5 + f;
     hash_output[6] = h6 + g;
     hash_output[7] = h7 + h;
+
+    unsigned int num_instr_end2 = get_num_instr();
+    unsigned int t_end2   = get_num_cycles();
+    print_str("\nSoftware Calculation completed in ");
+    unsigned int num_cycles2 = t_end2 - t_start2;
+    print_dec(t_end2 - t_start2);
+	print_str(" cycles.\n");
+    
+    unsigned int num_instr2 = num_instr_end2- num_instr_start2;
+    print_str("Instruction counter ..");
+	print_dec(num_instr2);
+	print_str("\nCPI: ");
+	stats_print_dec((num_cycles2 / num_instr2), 0, false);
+	print_str(".");
+	stats_print_dec(((100 * num_cycles2) / num_instr2) % 100, 2, true);
+	print_str("\n\n");
 
     for(int i = 0; i < 8; i++)
     {    print_hex(hash_output[i], 8);
@@ -389,28 +409,8 @@ void hello(void)
     print_str("\nHashed Value in hex: ");
     sha_256_print(message);
     
-    unsigned int t_start1 = get_num_cycles();
-    unsigned int num_instr_start1 = get_num_instr();
-    
     sha_256(message);
-    
-    unsigned int num_instr_end1 = get_num_instr();
-    unsigned int t_end1   = get_num_cycles();
-    
-    print_str("\n\nSoftware Calculation Completed in ");
-    unsigned int num_cycles1 = t_end1 - t_start1;
-    print_dec(t_end1 - t_start1);
-	print_str(" cycles.\n");
-
-    unsigned int num_instr1 = num_instr_end1- num_instr_start1;//num_instr_end1;
-    print_str("Instruction counter ..");
-	print_dec(num_instr1);
-	print_str("\nCPI: ");
-	stats_print_dec((num_cycles1 / num_instr1), 0, false);
-	print_str(".");
-	stats_print_dec(((100 * num_cycles1) / num_instr1) % 100, 2, true);
-	print_str("\n");
-    
+    //print_str("Hashed Value in hex ^^ ");
     
     //print_str("\nHardware Hashed Value in dec: ");
     print_str("\n");
@@ -436,34 +436,6 @@ void hello(void)
 	print_str(".");
 	stats_print_dec(((100 * num_cycles2) / num_instr2) % 100, 2, true);
 	print_str("\n\n");
-
-    
-    //print_str("\nTime taken for accelerator to compute: ");
-    WriteMessage(message);
-    
-    print_str("\n");
-    unsigned int t_start4 = get_num_cycles();
-    unsigned int num_instr_start4 = get_num_instr();
-    
-    StartAndWait();
-    
-    unsigned int num_instr_end4 = get_num_instr();
-    unsigned int t_end4   = get_num_cycles();
-    print_str("Time taken for accelerator to compute:");
-    unsigned int num_cycles4 = t_end4 - t_start4;
-    print_dec(t_end4 - t_start4);
-	print_str(" cycles.\n");
-    
-    unsigned int num_instr4 = num_instr_end4- num_instr_start4;
-    print_str("Instruction counter ..");
-	print_dec(num_instr4);
-	print_str("\nCPI: ");
-	stats_print_dec((num_cycles4 / num_instr4), 0, false);
-	print_str(".");
-	stats_print_dec(((100 * num_cycles4) / num_instr4) % 100, 2, true);
-	print_str("\n\n");
-
-    GetOutput();
     
     send_stat(true);
 }
