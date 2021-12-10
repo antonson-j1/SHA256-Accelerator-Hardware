@@ -1,0 +1,3 @@
+read_verilog sha256_unrolled.v
+synth_xilinx -top overall
+write_verilog sha256_unrolled_synth.v

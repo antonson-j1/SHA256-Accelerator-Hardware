@@ -1,3 +1,0 @@
-read_verilog sha256_core.v
-synth_xilinx -top overall
-write_verilog sha256_core_synth.v
