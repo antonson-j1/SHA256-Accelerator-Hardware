@@ -50,7 +50,7 @@ We use the following functions in our algorithm:
         0x748f82ee 0x78a5636f 0x84c87814 0x8cc70208 0x90befffa 0xa4506ceb 0xbef9a3f7 0xc67178f2
 
 ### Padding:
-This step is to make the the padded message become 512 bits. This step can be done in software becuase as per our analysis the bottleneck is not in this step. Therefore we tried to implement this step in the software.
+This step is to make the the padded message become 512 bits. This step can be done in software becuase as per our analysis the bottleneck is not in this step. Therefore this step needs to be implemented in software.
 - The input message is converted to bits
 - `1` is appended to this message
 - Now, `0`'s are appended till 448^th bit (= 512-64)
@@ -341,3 +341,7 @@ The diagram above shows the implementation of the SHA256 accelerator peripheral 
 ### Some Failiures:
 1. Tried interfacing with MicroBlaze in Vivado, but failed.
 2. Implementation of Padder Parser block was not done.
+
+#### Video Link:
+
+https://drive.google.com/drive/u/0/folders/1jZgz0kw_Lrw6K0A1S5sV644tq6n1V_5n
