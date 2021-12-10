@@ -37,13 +37,6 @@ if [ $? != 0 ]; then
 fi
 ./sha256_unrolled
 
-gcc -o sha256_c_implementation firmware/sha256_test.c firmware/sha256.c
-if [ $? != 0 ]; then
-    echo "* Compilation error! Please fix."
-exit 1;
-fi
-./sha256_c_implementation 
-
 cat << EOF
 End of run.sh
 EOF

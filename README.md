@@ -1,18 +1,96 @@
-
 # Project - SHA256
 
-*Note*: This is a forked repository of PicoRV32 - the original README is available at [[README_picorv32.md]].
+## Overview:
+A hash function takes an arbitrary-length message input to produce a fixed-length output. This project aims at implementing an hardware accelerator peripheral for SHA256 hashing algorithm with AXI4 interfacing with PicoRV32 CPU. The project focuses on multiple implementations of the accelerator with gradual improvements through spatial pre-computation techniques and pipelining. The SHA256 accelerators are implemented using Verilog and synthesized using Yosys Open Synthesis Suite. The optimized designs are then compared with a base-line C implementation in software.   Hash functions are used to securely store passwords, to quickly store and retrive data, and also to check if a file/message is corrupted.
 
-## Problem statement
-Interface the sequential multiplier you created in assignment 1 with the picorv32 processor.
+## Introduction:
 
-## Given
-The file [[firmware/hello.c]] has been modified to add functions that will write inputs to the `a` and `b` inputs of the multiplier, and there is another function that will wait on the return values.  Read these functions as well as the file [[axi4_mem_periph.v]] carefully and understand how the interfacing of C code with the peripheral is done.
+The SHA family of hash function algorithms are used during data transmission to produce an indecipherable message digest. A hash function is a one-way deterministic function which is practically infeasible to invert a hash value to its message input. Therefore, it becomes an essential tool for embedded security in e-mail, internet banking, and other applications. The strong motivation behind this project is that these applications especially on the server-side require high-throughput low-latent encryption devices.
 
-You will now need to instantiate your seq_mult.v (add a line to the appropriate place in the Makefile so it compiles) and then create some new `reg` or `wire` signals in the `axi4_mem_periph` module to enable sending and receiving signals from the C code.
+### Key Highlights of SHA256 Hashing:
 
-## Test
-To run the test, you can just type `make` in the main folder.  This will compile the Verilog files for simulation with `iverilog`, and will also compile the C code to generate a *hex* file (instructions and data in hexadecimal format) that can be loaded into the CPU memory for execution.
+1. The hashing is deterministic (i.e the data is scrambled deterministically)
+2. Irrespective of the size of input, the output of the hashing process is always 256-bits long.
+3. The original data cannot be retrived from the scrambled data as it is a one-way function.
 
-The C code will feed in 2 numbers, and test whether the output from your multiplier is correct.  Of course you can cheat and just return the product from your `Mult_GetResult` function, but for the final tests we will be running with separate test code, so changes you make in the C code will not be reflected there.  You could also just do the multiplication in Verilog and return the result.  Neither of these is going to teach you anything about computer design, so if you need to do this to get at least a partial result, please indicate this properly in your code so that we can consider it for partial marks.
+## Algorithm:
 
+The general architecture of the SHA256 hashing algorithm consists of following modules: 
+ - **Padding and Parsing:** that ensures that the input message has length of multiples of 512 bits.
+
+ - **Message Expansion:** that decomposes the input message into 16 blocks of 32 bits each and further expands it into 64 blocks `{W}`
+
+- **Block Compression:**  that iterates 64 times on 8 - 32 bit variables `{a,b,c,d,e,f,g,h}` using {W} values obtained from previous stage and constants `{K}` 
+
+- **Hash Value Computation:** that utilizes the 8 variables to generate a concatenated 256 bit output  
+
+#### Basic Operations:
+- `RotR(A, n)` denotes the circular right shift of n bits of the binary word A.
+- `ShR(A, n)` denotes the right shift of n bits of the binary word A.
+- `A||B` denotes the concatenation of the binary words A and B.
+
+#### Functions:
+We use the following functions in our algorithm:
+- ***Ch(X, Y, Z)** = (X ∧ Y ) ⊕ (X ∧ Z),*
+- ***Maj(X, Y, Z)** = (X ∧ Y ) ⊕ (X ∧ Z) ⊕ (Y ∧ Z)*
+- ***Σ_0(X)** = RotR(X, 2) ⊕ RotR(X, 13) ⊕ RotR(X, 22),*
+- ***Σ_1(X)** = RotR(X, 6) ⊕ RotR(X, 11) ⊕ RotR(X, 25),*
+- ***σ_0(X)** = RotR(X, 7) ⊕ RotR(X, 18) ⊕ ShR(X, 3),*
+- ***σ_1(X)** = RotR(X, 17) ⊕ RotR(X, 19) ⊕ ShR(X, 10),*
+
+64 binary words of `K[i]` are given by the first 4 bytes of the fractional parts of the cube roots of the first 64 prime numbers:
+
+        0x428a2f98 0x71374491 0xb5c0fbcf 0xe9b5dba5 0x3956c25b 0x59f111f1 0x923f82a4 0xab1c5ed5
+        0xd807aa98 0x12835b01 0x243185be 0x550c7dc3 0x72be5d74 0x80deb1fe 0x9bdc06a7 0xc19bf174
+        0xe49b69c1 0xefbe4786 0x0fc19dc6 0x240ca1cc 0x2de92c6f 0x4a7484aa 0x5cb0a9dc 0x76f988da
+        0x983e5152 0xa831c66d 0xb00327c8 0xbf597fc7 0xc6e00bf3 0xd5a79147 0x06ca6351 0x14292967
+        0x27b70a85 0x2e1b2138 0x4d2c6dfc 0x53380d13 0x650a7354 0x766a0abb 0x81c2c92e 0x92722c85
+        0xa2bfe8a1 0xa81a664b 0xc24b8b70 0xc76c51a3 0xd192e819 0xd6990624 0xf40e3585 0x106aa070
+        0x19a4c116 0x1e376c08 0x2748774c 0x34b0bcb5 0x391c0cb3 0x4ed8aa4a 0x5b9cca4f 0x682e6ff3
+        0x748f82ee 0x78a5636f 0x84c87814 0x8cc70208 0x90befffa 0xa4506ceb 0xbef9a3f7 0xc67178f2
+
+### Padding:
+This step is to make the the padded message become 512 bits. This step can be done in software becuase as per our analysis the bottleneck is not in this step. Therefore we tried to implement this step in the software.
+- The input message is converted to bits
+- `1` is appended to this message
+- Now, `0`'s are appended till 448^th bit (= 512-64)
+- Then the length of the input message is calculated and is appended to the end of this 448 bit long value in 64 bits format to make the entire input into 512 bits.
+
+This new 512 bit padded input is used for further processing from here on. However for our use case we assume that we have the padded message ready, as we faced some problem while implementing the code for pre-processing.
+
+## Execution of the Code:
+
+There are three main directories. Namely:
+
+1. SHACORE
+2. SHACORE\_UNROLLED
+3. SHACORE\_UNROLLED\_PIPELINED
+
+As their names suggest each of these folders contain a different implementation of the SHA256 Peripheral.
+
+#### **SHACORE:**
+To move into this folder use `$ cd SHACORE`
+
+This folder contains the implementation of the original un-optimsed (without any spatial optimisation or pipelining) verilog code. The `sha256_core.v`file contains the verilog implementation of the accelerator.
+
+To execute and see the peripheral inaction use the `$ make` command.
+
+To run the Yosys synthesis and also to execute the generated file simultaneously, use the '$ ./run.sh' command. If the `$ ./run.sh` didn't work, use `chmod +x run.sh` followed by `$ ./run.sh`. Once this is done, you will be able to see the synthesis results in the command prompt. To view the complete file, use `$ ./run.sh > output.log`. This will store the entire output in the *output.log* file.
+
+#### **SHACORE-UNROLLED:**
+To move into this folder use `$ cd SHACORE_UNROLLED`
+
+This folder contains the implementation of the original spatially optimised verilog code. The `sha256_unrolled.v`file contains the verilog implementation of the accelerator. Further details about unrolling (which is a form of spacial optimisation) is given in the following section.
+
+To execute and see the peripheral inaction use the `$ make` command.
+
+To run the Yosys synthesis and also to execute the generated file simultaneously, use the '$ ./run.sh' command. If the `$ ./run.sh` didn't work, use `chmod +x run.sh` followed by `$ ./run.sh`. Once this is done, you will be able to see the synthesis results in the command prompt. To view the complete file, use `$ ./run.sh > output.log`. This will store the entire output in the *output.log* file.
+
+#### **SHACORE-UNROLLED-PIPELINED:**
+To move into this folder use `$ cd SHACORE_UNROLLED_PIPELINED`
+
+This folder contains the implementation of the optimised verilog code, which contains both unrolling and pipelining. The `sha256_unrolled_pipelined.v`file contains the verilog implementation of the accelerator. Further details about this unrolled and pipelined accelerator architecture is given in the following section.
+
+To execute and see the peripheral inaction use the `$ make` command.
+
+To run the Yosys synthesis and also to execute the generated file simultaneously, use the '$ ./run.sh' command. If the `$ ./run.sh` didn't work, use `chmod +x run.sh` followed by `$ ./run.sh`. Once this is done, you will be able to see the synthesis results in the command prompt. To view the complete file, use `$ ./run.sh > output.log`. This will store the entire output in the *output.log* file.

@@ -29,9 +29,9 @@ void stats(void)
 {
 	unsigned int num_cycles, num_instr;
 	__asm__ volatile ("rdcycle %0; rdinstret %1;" : "=r"(num_cycles), "=r"(num_instr));
-	print_str("Cycle counter ........");
+	print_str("Total Cycle counter (Including Hardware & Software) ........");
 	stats_print_dec(num_cycles, 8, false);
-	print_str("\nInstruction counter ..");
+	print_str("\nTotal Instruction counter (Including Hardware & Software) ..");
 	stats_print_dec(num_instr, 8, false);
 	print_str("\nCPI: ");
 	stats_print_dec((num_cycles / num_instr), 0, false);

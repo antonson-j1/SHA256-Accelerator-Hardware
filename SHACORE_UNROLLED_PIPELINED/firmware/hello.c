@@ -32,6 +32,7 @@ void send_stat(bool status)
 
 void WriteMessage(unsigned int x[16]);
 void StartAndWait(void);
+void GetOutput_print(void);
 void GetOutput(void);
 
 //Sending message input
@@ -388,16 +389,16 @@ void hello(void)
     print_str("\nHashed Value in hex: ");
     sha_256_print(message);
     
-    int t_start1 = get_num_cycles();
+    unsigned int t_start1 = get_num_cycles();
     unsigned int num_instr_start1 = get_num_instr();
     
     sha_256(message);
     
     unsigned int num_instr_end1 = get_num_instr();
-    int t_end1   = get_num_cycles();
+    unsigned int t_end1   = get_num_cycles();
     
     print_str("\n\nSoftware Calculation Completed in ");
-    int num_cycles1 = t_end1 - t_start1;
+    unsigned int num_cycles1 = t_end1 - t_start1;
     print_dec(t_end1 - t_start1);
 	print_str(" cycles.\n");
 
@@ -411,10 +412,9 @@ void hello(void)
 	print_str("\n");
     
     
-    
     //print_str("\nHardware Hashed Value in dec: ");
     print_str("\n");
-    int t_start2 = get_num_cycles();
+    unsigned int t_start2 = get_num_cycles();
     unsigned int num_instr_start2 = get_num_instr();
     
     WriteMessage(message);
@@ -422,9 +422,9 @@ void hello(void)
     GetOutput();
     
     unsigned int num_instr_end2 = get_num_instr();
-    int t_end2   = get_num_cycles();
+    unsigned int t_end2   = get_num_cycles();
     print_str("\nHardware Calculation Completed in ");
-    int num_cycles2 = t_end2 - t_start2;
+    unsigned int num_cycles2 = t_end2 - t_start2;
     print_dec(t_end2 - t_start2);
 	print_str(" cycles.\n");
     
@@ -437,5 +437,33 @@ void hello(void)
 	stats_print_dec(((100 * num_cycles2) / num_instr2) % 100, 2, true);
 	print_str("\n\n");
 
+    
+    //print_str("\nTime taken for accelerator to compute: ");
+    WriteMessage(message);
+    
+    print_str("\n");
+    unsigned int t_start4 = get_num_cycles();
+    unsigned int num_instr_start4 = get_num_instr();
+    
+    StartAndWait();
+    
+    unsigned int num_instr_end4 = get_num_instr();
+    unsigned int t_end4   = get_num_cycles();
+    print_str("Time taken for accelerator to compute:");
+    unsigned int num_cycles4 = t_end4 - t_start4;
+    print_dec(t_end4 - t_start4);
+	print_str(" cycles.\n");
+    
+    unsigned int num_instr4 = num_instr_end4- num_instr_start4;
+    print_str("Instruction counter ..");
+	print_dec(num_instr4);
+	print_str("\nCPI: ");
+	stats_print_dec((num_cycles4 / num_instr4), 0, false);
+	print_str(".");
+	stats_print_dec(((100 * num_cycles4) / num_instr4) % 100, 2, true);
+	print_str("\n\n");
+
+    GetOutput();
+    
     send_stat(true);
 }
