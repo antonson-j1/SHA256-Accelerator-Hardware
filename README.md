@@ -156,11 +156,11 @@ To run the Yosys synthesis and also to execute the generated file simultaneously
 
 ## **Block Diagrams:**
 
-![SHA CORE IMPLEMENTATION BLOCK DIAGRAM](https://git.ee2003.dev.iitm.ac.in/ee19b025/project-sha256/src/branch/master/Others/core.jpg?raw=true)
+![SHA CORE IMPLEMENTATION BLOCK DIAGRAM](https://github.com/antonson-j1/SHA256-Accelerator-Hardware/tree/master/Others/core.jpg?raw=true)
 
 The diagram above shows the implementation of the most primitive implementation of the SHA256 accelerator peripheral.
 
-![SHA UNROLLED & PIPELINED IMPLEMENTATION BLOCK DIAGRAM](https://git.ee2003.dev.iitm.ac.in/ee19b025/project-sha256/src/branch/master/Others/unrolled_pipelined.jpg?raw=true)
+![SHA UNROLLED & PIPELINED IMPLEMENTATION BLOCK DIAGRAM](https://github.com/antonson-j1/SHA256-Accelerator-Hardware/tree/master/Others/unrolled_pipelined.jpg?raw=true)
 
 The diagram above shows the implementation of the SHA256 accelerator peripheral with Unrolling & Pipelining.
 
